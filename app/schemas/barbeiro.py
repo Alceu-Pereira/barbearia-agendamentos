@@ -1,13 +1,13 @@
 from pydantic import BaseModel, ConfigDict
 
-class ClienteBase(BaseModel):
+class BarbeiroBase(BaseModel):
     nome: str
     telefone: str
 
-class ClienteCreate(ClienteBase):
+class BarbeiroCreate(BarbeiroBase):
     pass
 
-class ClienteResponse(ClienteBase):
+class BarbeiroResponse(BarbeiroBase):
     id: int
     ativo: bool
 
