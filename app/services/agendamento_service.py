@@ -10,7 +10,7 @@ from app.services.barbeiro_service import buscar_barbeiro_por_id
 from app.services.cliente_service import buscar_cliente_por_id
 from app.services.servico_service import buscar_servico_por_id
 
-from exceptions import RecursoNaoEncontrado, ConflitoDeHorario
+from app.services.exceptions import RecursoNaoEncontrado, ConflitoDeHorario
 
 from sqlalchemy.orm import Session
 from sqlalchemy import select
@@ -47,3 +47,26 @@ def criar_agendamento(
     servico = buscar_servico_por_id(db, dados.servico_id)
     if servico is None:
         raise RecursoNaoEncontrado("Serviço não encontrado")
+
+    data_hora_fim = calcular_horario_fim(dados.data_hora_inicio, servico.duracao_minutos)
+
+    conflito = verificar_conflito_horario(db, dados.barbeiro_id, dados.data_hora_inicio, data_hora_fim)
+
+    if conflito:
+        raise ConflitoDeHorario("Conflito de horário nos agendamentos")
+
+    agendamento = Agendamento(
+        cliente_id = dados.cliente_id,
+        barbeiro_id = dados.barbeiro_id,
+        servico_id = dados.servico_id,
+        status = Estados.PENDENTE,
+        data_hora_inicio = dados.data_hora_inicio,
+        data_hora_fim = data_hora_fim,
+        preco_cobrado = servico.preco
+    )
+
+    db.add(agendamento)
+    db.commit()
+    db.refresh(agendamento)
+    
+    return agendamento
