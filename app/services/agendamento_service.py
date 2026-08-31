@@ -4,6 +4,13 @@ from app.database import SessionLocal
 
 from app.models.enums import Estados
 from app.models.agendamento import Agendamento
+from app.schemas.agendamento import AgendamentoCreate
+
+from app.services.barbeiro_service import buscar_barbeiro_por_id
+from app.services.cliente_service import buscar_cliente_por_id
+from app.services.servico_service import buscar_servico_por_id
+
+from exceptions import RecursoNaoEncontrado, ConflitoDeHorario
 
 from sqlalchemy.orm import Session
 from sqlalchemy import select
@@ -23,3 +30,20 @@ def verificar_conflito_horario(
        if not (data_hora_inicio >= agendamento.data_hora_fim or data_hora_fim <= agendamento.data_hora_inicio):
            return True
     return False
+
+def criar_agendamento(
+        db: Session,
+        dados: AgendamentoCreate
+) -> Agendamento:
+
+    cliente = buscar_cliente_por_id(db, dados.cliente_id)
+    if cliente is None:
+        raise RecursoNaoEncontrado("Cliente não encontrado")
+
+    barbeiro = buscar_barbeiro_por_id(db, dados.barbeiro_id)
+    if barbeiro is None:
+        raise RecursoNaoEncontrado("Barbeiro não encontrado")
+
+    servico = buscar_servico_por_id(db, dados.servico_id)
+    if servico is None:
+        raise RecursoNaoEncontrado("Serviço não encontrado")
