@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date, time
 
 from app.database import SessionLocal
 
@@ -70,3 +70,29 @@ def criar_agendamento(
     db.refresh(agendamento)
     
     return agendamento
+
+
+def listar_disponibilidade(
+        db: Session,
+        barbeiro_id: int,
+        data: date,
+        ) -> list[datetime]:
+
+    horario_abertura_barbearia = time(8, 0)
+    horario_fechamento_barbearia = time(18, 0)
+    slots_possiveis = []
+
+    data_incrementada = datetime.combine(data, horario_abertura_barbearia)
+
+    barbeiro = buscar_barbeiro_por_id(db, barbeiro_id)
+    if barbeiro is None:
+        raise RecursoNaoEncontrado("Barbeiro não encontrado")
+    
+    if data.weekday() == 0 or data.weekday() == 6:
+        return []
+
+    while data_incrementada < datetime.combine(data, horario_fechamento_barbearia):
+        slots_possiveis.append(data_incrementada)
+        data_incrementada += timedelta(minutes=30)
+
+    return slots_possiveis
