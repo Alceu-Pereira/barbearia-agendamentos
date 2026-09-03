@@ -78,11 +78,13 @@ def listar_disponibilidade(
         data: date,
         ) -> list[datetime]:
 
-    horario_abertura_barbearia = time(8, 0)
-    horario_fechamento_barbearia = time(18, 0)
+    HORARIO_ABERTURA_BARBEARIA = time(8, 0)
+    HORARIO_FECHAMENTO_BARBEARIA = time(18, 0)
+    TEMPO_DE_SERVICO = 30
+    horario_fechamento_do_dia = datetime.combine(data, HORARIO_FECHAMENTO_BARBEARIA)
     slots_possiveis = []
 
-    data_incrementada = datetime.combine(data, horario_abertura_barbearia)
+    data_incrementada = datetime.combine(data, HORARIO_ABERTURA_BARBEARIA)
 
     barbeiro = buscar_barbeiro_por_id(db, barbeiro_id)
     if barbeiro is None:
@@ -91,8 +93,13 @@ def listar_disponibilidade(
     if data.weekday() == 0 or data.weekday() == 6:
         return []
 
-    while data_incrementada < datetime.combine(data, horario_fechamento_barbearia):
-        slots_possiveis.append(data_incrementada)
-        data_incrementada += timedelta(minutes=30)
+    while data_incrementada < horario_fechamento_do_dia:
+
+        fim_do_servico = calcular_horario_fim(data_incrementada, TEMPO_DE_SERVICO)
+
+        if not verificar_conflito_horario(db, barbeiro_id, data_incrementada, fim_do_servico):
+            slots_possiveis.append(data_incrementada)
+            
+        data_incrementada += timedelta(minutes=TEMPO_DE_SERVICO)
 
     return slots_possiveis
