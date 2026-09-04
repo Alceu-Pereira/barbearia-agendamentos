@@ -9,3 +9,7 @@ SessionLocal = sessionmaker(engine)
 
 class Base(DeclarativeBase):
     pass
+
+def get_db():
+    with SessionLocal() as session:
+        yield session
