@@ -3,3 +3,6 @@ class RecursoNaoEncontrado(Exception):
 
 class ConflitoDeHorario(Exception):
     pass
+
+class OperacaoInvalida(Exception):
+    pass

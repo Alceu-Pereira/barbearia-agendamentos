@@ -10,7 +10,7 @@ from app.services.barbeiro_service import buscar_barbeiro_por_id
 from app.services.cliente_service import buscar_cliente_por_id
 from app.services.servico_service import buscar_servico_por_id
 
-from app.services.exceptions import RecursoNaoEncontrado, ConflitoDeHorario
+from app.services.exceptions import RecursoNaoEncontrado, ConflitoDeHorario, OperacaoInvalida
 
 from sqlalchemy.orm import Session
 from sqlalchemy import select
@@ -103,3 +103,34 @@ def listar_disponibilidade(
         data_incrementada += timedelta(minutes=TEMPO_DE_SERVICO)
 
     return slots_possiveis
+
+def buscar_agendamento_por_id(
+        db: Session,
+        agendamento_id: int
+        ) -> Agendamento | None:
+    agendamento = db.get(Agendamento, agendamento_id)
+    return agendamento
+
+
+def cancelar_agendamento(
+        db: Session, 
+        agendamento_id: int
+        ) -> Agendamento:
+
+    agendamento = buscar_agendamento_por_id(db, agendamento_id)
+    if agendamento is None:
+        raise RecursoNaoEncontrado("Agendamento não encontrado")
+
+    if agendamento.status == Estados.CONCLUIDO:
+        raise OperacaoInvalida("Agendamento já foi concluído")
+
+    if agendamento.status == Estados.CANCELADO:
+        raise OperacaoInvalida("Agendamento já foi cancelado")
+
+    agendamento.status = Estados.CANCELADO
+    db.commit()
+    db.refresh(agendamento)
+
+    return agendamento
+
+    
