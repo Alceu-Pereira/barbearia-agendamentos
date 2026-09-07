@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends
 
 from app.schemas.agendamento import AgendamentoCreate, AgendamentoResponse
 
-from app.services.agendamento_service import criar_agendamento, listar_disponibilidade
+from app.services.agendamento_service import criar_agendamento, listar_disponibilidade, cancelar_agendamento
 
 from app.services.exceptions import RecursoNaoEncontrado, ConflitoDeHorario, OperacaoInvalida
 
@@ -34,3 +34,14 @@ def listar_disponibilidade_router(barbeiro_id: int, data: date, db: Session = De
         raise HTTPException(status_code=404, detail="Barbeiro não encontrado.")
 
     return horarios_disponiveis
+
+@router.patch("/{agendamento_id}/cancelar", response_model=AgendamentoResponse)
+def cancelar_agendamento_router(agendamento_id: int, db: Session = Depends(get_db)):
+    try:
+        agendamento_cancelado = cancelar_agendamento(db, agendamento_id)
+    except RecursoNaoEncontrado:
+        raise HTTPException(status_code=404, detail="Recurso não encontrado")
+    except OperacaoInvalida:
+        raise HTTPException(status_code=400, detail="Operação inválida")
+
+    return agendamento_cancelado
