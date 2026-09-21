@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from app.database import get_db
 from sqlalchemy.orm import Session
 
-from app.services.servico_service import criar_servico, buscar_servico_por_id
+from app.services.servico_service import criar_servico, buscar_servico_por_id, listar_servicos_ativos
 
 from app.schemas.servico import ServicoCreate, ServicoResponse
 
@@ -22,3 +22,7 @@ def buscar_servico_por_id_router(servico_id: int, db: Session = Depends(get_db))
     if servico is None:
         raise HTTPException(status_code=404, detail="Serviço não encontrado.")
     return servico
+
+@router.get("/", response_model=list[ServicoResponse])
+def listar_servicos_ativos_router(db: Session = Depends(get_db)):
+    return listar_servicos_ativos(db)

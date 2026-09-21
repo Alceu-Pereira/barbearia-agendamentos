@@ -1,6 +1,9 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import select
+
 from app.models.servico import Servico
 from app.schemas.servico import ServicoCreate
+
 
 def criar_servico(db: Session, dados: ServicoCreate) -> Servico:
     servico = Servico(
@@ -18,3 +21,8 @@ def criar_servico(db: Session, dados: ServicoCreate) -> Servico:
 def buscar_servico_por_id(db: Session, servico_id: int) -> Servico | None:
     servico = db.get(Servico, servico_id)
     return servico
+
+def listar_servicos_ativos(db: Session) -> list[Servico]:
+    stmt = select(Servico).where(Servico.ativo == True)
+    resultado = db.scalars(stmt).all()
+    return resultado
