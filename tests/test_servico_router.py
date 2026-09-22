@@ -41,3 +41,37 @@ def test_buscar_servico_por_id_existente(client):
         "preco": "15.55",
         "ativo": True,
     }
+
+def test_listar_servicos_ativos(client):
+    servico_1 = client.post(
+            "/api/v1/servicos", 
+            json={
+                "nome": "servico_teste1",
+                "duracao_minutos": 15,
+                "preco": "15.55"
+            }
+            )
+
+    servico_2 = client.post(
+                "/api/v1/servicos", 
+                json={
+                    "nome": "servico_teste2",
+                    "duracao_minutos": 15,
+                    "preco": "15.55"
+                }
+                )
+
+    servico_3 = client.post(
+                "/api/v1/servicos", 
+                json={
+                    "nome": "servico_teste3",
+                    "duracao_minutos": 15,
+                    "preco": "15.55"
+                }
+                )
+    response = client.get(
+        "api/v1/servicos"
+    )
+
+    assert response.status_code == 200
+    assert len(response.json()) == 3
