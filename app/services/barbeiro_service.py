@@ -1,4 +1,6 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import select
+
 from app.models.barbeiro import Barbeiro
 from app.schemas.barbeiro import BarbeiroCreate
 
@@ -15,3 +17,8 @@ def criar_barbeiro(db: Session, dados: BarbeiroCreate) -> Barbeiro:
 def buscar_barbeiro_por_id(db: Session, barbeiro_id: int) -> Barbeiro | None:
     barbeiro = db.get(Barbeiro, barbeiro_id)
     return barbeiro 
+
+def listar_barbeiros_ativos(db: Session) -> list[Barbeiro]:
+    stmt = select(Barbeiro).where(Barbeiro.ativo == True)
+    resultado = db.scalars(stmt).all()
+    return resultado

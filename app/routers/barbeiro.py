@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends
 
 from sqlalchemy.orm import Session
 
-from app.services.barbeiro_service import criar_barbeiro, buscar_barbeiro_por_id
+from app.services.barbeiro_service import criar_barbeiro, buscar_barbeiro_por_id, listar_barbeiros_ativos
 
 from app.schemas.barbeiro import BarbeiroCreate, BarbeiroResponse
 
@@ -23,3 +23,7 @@ def buscar_barbeiro_por_id_router(barbeiro_id: int, db: Session = Depends(get_db
     if barbeiro is None:
         raise HTTPException(status_code=404, detail="Barbeiro não encontrado.")
     return barbeiro
+
+@router.get("/", response_model=list[BarbeiroResponse])
+def listar_barbeiros_ativos_router(db: Session = Depends(get_db)):
+    return listar_barbeiros_ativos(db)

@@ -29,3 +29,35 @@ def test_buscar_barbeiro_por_id_existente(client):
         "telefone": "5512345678",
         "ativo": True
     }
+
+def test_listar_barbeiros_ativos(client):
+    barbeiro_1 = client.post(
+        "/api/v1/barbeiros/",
+        json={
+            "nome": "Teste", 
+            "telefone": "5512345678"
+        }
+    )
+
+    barbeiro_2 = client.post(
+            "/api/v1/barbeiros/",
+            json={
+                "nome": "Teste2", 
+                "telefone": "5512345678"
+            }
+        )
+
+    barbeiro_3 = client.post(
+            "/api/v1/barbeiros/",
+            json={
+                "nome": "Teste3", 
+                "telefone": "5512345678"
+            }
+        )
+
+    response = client.get(
+        "/api/v1/barbeiros"
+    )
+
+    assert response.status_code == 200
+    assert len(response.json()) == 3
