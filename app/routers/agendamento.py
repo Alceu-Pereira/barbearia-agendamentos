@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends
 
 from app.schemas.agendamento import AgendamentoCreate, AgendamentoResponse
 
-from app.services.agendamento_service import criar_agendamento, listar_disponibilidade, cancelar_agendamento
+from app.services.agendamento_service import criar_agendamento, listar_disponibilidade, cancelar_agendamento, listar_agendamentos
 
 from app.services.exceptions import RecursoNaoEncontrado, ConflitoDeHorario, OperacaoInvalida
 
@@ -45,3 +45,7 @@ def cancelar_agendamento_router(agendamento_id: int, db: Session = Depends(get_d
         raise HTTPException(status_code=400, detail="Operação inválida")
 
     return agendamento_cancelado
+
+@router.get("/", response_model=list[AgendamentoResponse])
+def listar_agendamentos_router(barbeiro_id: int | None = None, data: date | None = None, db: Session = Depends(get_db)):
+    return listar_agendamentos(db, barbeiro_id, data)
