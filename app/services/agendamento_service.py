@@ -133,4 +133,19 @@ def cancelar_agendamento(
 
     return agendamento
 
+
+def listar_agendamentos(db: Session, barbeiro_id: int | None = None, data: date | None = None) -> list[Agendamento]:
+    condicoes = []
+
+    if barbeiro_id is not None:
+        condicoes.append(Agendamento.barbeiro_id == barbeiro_id)
+
+    if data is not None:
+        inicio_do_dia = datetime.combine(data, time(0, 0))
+        inicio_dia_seguinte = inicio_do_dia + timedelta(days=1)
+        condicoes.append(Agendamento.data_hora_inicio >= inicio_do_dia)
+        condicoes.append(Agendamento.data_hora_inicio < inicio_dia_seguinte)
     
+    stmt = select(Agendamento).where(*condicoes)
+    resultado = db.scalars(stmt).all()
+    return resultado
